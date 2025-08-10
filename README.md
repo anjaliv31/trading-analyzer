@@ -5,7 +5,7 @@ A full-stack web application that allows users to upload trading and news CSV fi
 ## 🚀 Features
 
 - 🔐 User Authentication (Login/Register with JWT)
-- 📂 CSV File Upload (`trades.csv`, `news_events.csv`)
+- 📂 CSV File Upload (`trades.csv`, `news.csv`)
 - 📈 Simulated Trade Pattern Analysis
 - 🛡 Protected Routes & Role-based Access
 - 💡 Clean UI with Tailwind CSS
@@ -26,7 +26,4 @@ A full-stack web application that allows users to upload trading and news CSV fi
 - 🗃 Multer for File Upload
 - 🌐 CORS + .env configuration
 
----
-
-## 📁 Folder Structure
 
