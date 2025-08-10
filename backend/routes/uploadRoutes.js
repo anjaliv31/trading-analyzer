@@ -1,22 +1,55 @@
-const express = require("express");
-const fs = require("fs");
-const path = require("path");
+import express from "express";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+
 const router = express.Router();
 
-router.post("/", (req, res) => {
-  const trades = req.files?.trades;
-  const news = req.files?.news;
+// Ensure upload directories exist
+const tradesDir = "uploads/trades";
+const newsDir = "uploads/news";
 
-  if (!trades || !news)
-    return res.status(400).json({ success: false, message: "Both files required" });
-
-  const dir = path.join(__dirname, "..", "data");
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir);
-
-  trades.mv(path.join(dir, "trades.csv"));
-  news.mv(path.join(dir, "news_events.csv"));
-
-  res.json({ success: true });
+[tradesDir, newsDir].forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
 });
 
-module.exports = router;
+// Storage setup for Multer
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    if (file.fieldname === "tradesFile") {
+      cb(null, tradesDir);
+    } else if (file.fieldname === "newsFile") {
+      cb(null, newsDir);
+    }
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  }
+});
+
+// File filter for CSV only
+const fileFilter = (req, file, cb) => {
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (ext !== ".csv") {
+    return cb(new Error("Only CSV files are allowed"), false);
+  }
+  cb(null, true);
+};
+
+const upload = multer({ storage, fileFilter });
+
+// POST /api/upload
+router.post("/", upload.fields([{ name: "tradesFile" }, { name: "newsFile" }]), (req, res) => {
+  if (!req.files || (!req.files.tradesFile && !req.files.newsFile)) {
+    return res.status(400).json({ message: "No files uploaded" });
+  }
+
+  res.json({
+    message: "✅ Data Uploaded Successfully",
+    files: req.files
+  });
+});
+
+export default router;
